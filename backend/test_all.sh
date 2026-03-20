@@ -274,9 +274,51 @@ check "list languages" '"languages"' "$R"
 R=$(curl -s $BASE/api/tts/voices)
 check "list voices" '"voices"' "$R"
 
-# --- TEST 10: Engines ---
+# --- TEST 10: File Transfer ---
 echo ""
-echo "--- Test 10: Engine Registry ---"
+echo "--- Test 10: File Transfer ---"
+
+# Upload a file
+R=$(curl -s -X POST $BASE/api/files/upload -H "$AUTH" \
+    -F "file=@test_all.sh" -F "category=test")
+check "upload file" '"file_id"' "$R"
+FILE_ID=$(echo "$R" | python3 -c "import sys,json; print(json.load(sys.stdin).get('file_id',''))" 2>/dev/null)
+
+R=$(curl -s $BASE/api/files -H "$AUTH")
+check "list files" '"files"' "$R"
+
+R=$(curl -s $BASE/api/files/stats -H "$AUTH")
+check "file stats" '"total_files"' "$R"
+
+if [ -n "$FILE_ID" ]; then
+    R=$(curl -s -o /dev/null -w "%{http_code}" $BASE/api/files/$FILE_ID -H "$AUTH")
+    if [ "$R" = "200" ]; then
+        echo "  [PASS] download file"
+        PASS=$((PASS+1))
+    else
+        echo "  [FAIL] download file (HTTP $R)"
+        FAIL=$((FAIL+1))
+    fi
+
+    R=$(curl -s -X DELETE $BASE/api/files/$FILE_ID -H "$AUTH")
+    check "delete file" '"status":"deleted"' "$R"
+fi
+
+# --- TEST 11: System Monitor ---
+echo ""
+echo "--- Test 11: System Monitor ---"
+
+R=$(curl -s $BASE/api/system/status -H "$AUTH")
+check "system status" '"cpu"' "$R"
+check "system has memory" '"memory"' "$R"
+check "system has disk" '"disk"' "$R"
+
+R=$(curl -s $BASE/api/system/quick -H "$AUTH")
+check "quick stats" '"cpu_percent"' "$R"
+
+# --- TEST 12: Engines ---
+echo ""
+echo "--- Test 12: Engine Registry ---"
 R=$(curl -s $BASE/api/engines -H "$AUTH")
 check "engines list has llm" '"llm"' "$R"
 

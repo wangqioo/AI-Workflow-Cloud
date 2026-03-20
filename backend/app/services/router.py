@@ -3,13 +3,13 @@
 Consolidates: translate, crawler, TTS, email (from v0.7.5 ports 8088-8093).
 """
 
-from fastapi import APIRouter, Depends
-from fastapi.responses import FileResponse
+from fastapi import APIRouter, Depends, File, UploadFile
+from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel
 
 from ..auth.dependencies import get_current_user
 from ..models.user import User
-from . import crawler, email_svc, translate, tts
+from . import crawler, email_svc, files, system_monitor, translate, tts
 
 router = APIRouter(tags=["services"])
 
@@ -143,3 +143,70 @@ async def summarize_email(
     user: User = Depends(get_current_user),
 ):
     return await email_svc.summarize_email(email_id)
+
+
+# ---- File Transfer ----
+
+@router.post("/api/files/upload")
+async def upload_file_endpoint(
+    file: UploadFile = File(...),
+    category: str = "general",
+    user: User = Depends(get_current_user),
+):
+    content = await file.read()
+    return await files.upload_file(
+        user.id, file.filename or "untitled", content, category
+    )
+
+
+@router.get("/api/files")
+async def list_files(
+    category: str | None = None,
+    user: User = Depends(get_current_user),
+):
+    file_list = await files.list_files(user.id, category)
+    return {"files": file_list, "count": len(file_list)}
+
+
+@router.get("/api/files/stats")
+async def file_stats(user: User = Depends(get_current_user)):
+    return await files.get_stats(user.id)
+
+
+@router.get("/api/files/{file_id}")
+async def download_file(
+    file_id: str,
+    user: User = Depends(get_current_user),
+):
+    result = await files.download_file(user.id, file_id)
+    if not result:
+        return {"error": "File not found"}
+    content, filename, mime_type = result
+    return Response(
+        content=content,
+        media_type=mime_type,
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@router.delete("/api/files/{file_id}")
+async def delete_file(
+    file_id: str,
+    user: User = Depends(get_current_user),
+):
+    ok = await files.delete_file(user.id, file_id)
+    if not ok:
+        return {"error": "File not found"}
+    return {"status": "deleted"}
+
+
+# ---- System Monitor ----
+
+@router.get("/api/system/status")
+async def system_status(user: User = Depends(get_current_user)):
+    return await system_monitor.get_system_status()
+
+
+@router.get("/api/system/quick")
+async def system_quick(user: User = Depends(get_current_user)):
+    return await system_monitor.get_quick_stats()
