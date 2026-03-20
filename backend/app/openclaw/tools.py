@@ -372,12 +372,20 @@ async def _discover_capabilities(args: dict, user_id: str | None) -> str:
 
 
 async def _translate_text(args: dict, user_id: str | None) -> str:
-    # TODO: integrate with translation service module
-    return json.dumps({"status": "not_implemented", "message": "Translation service pending migration"})
+    from ..services import translate
+    text = args.get("text", "")
+    source = args.get("source", "auto")
+    target = args.get("target", "en")
+    result = await translate.translate_text(text, source, target)
+    return json.dumps(result)
 
 
 async def _text_to_speech(args: dict, user_id: str | None) -> str:
-    return json.dumps({"status": "not_implemented", "message": "TTS service pending migration"})
+    from ..services import tts
+    text = args.get("text", "")
+    voice = args.get("voice", "xiaoxiao")
+    result = await tts.synthesize(text, voice)
+    return json.dumps(result)
 
 
 async def _query_knowledge_base(args: dict, user_id: str | None) -> str:
@@ -396,23 +404,28 @@ async def _query_knowledge_base(args: dict, user_id: str | None) -> str:
 
 
 async def _crawl_webpage(args: dict, user_id: str | None) -> str:
-    import httpx
+    from ..services import crawler
     url = args.get("url", "")
     if not url:
         return json.dumps({"error": "URL is required"})
-    async with httpx.AsyncClient(timeout=30) as client:
-        resp = await client.get(url, follow_redirects=True)
-        # Return first 4000 chars of text content
-        text = resp.text[:4000]
-        return json.dumps({"url": url, "status": resp.status_code, "content": text})
+    result = await crawler.crawl_page(url)
+    return json.dumps(result)
 
 
 async def _check_email(args: dict, user_id: str | None) -> str:
-    return json.dumps({"status": "not_implemented", "message": "Email service pending migration"})
+    from ..services import email_svc
+    limit = int(args.get("limit", 10))
+    emails = await email_svc.get_inbox(limit)
+    return json.dumps({"emails": emails, "count": len(emails)})
 
 
 async def _send_email(args: dict, user_id: str | None) -> str:
-    return json.dumps({"status": "not_implemented", "message": "Email service pending migration"})
+    from ..services import email_svc
+    to = args.get("to", "")
+    subject = args.get("subject", "")
+    body = args.get("body", "")
+    result = await email_svc.send_email(to, subject, body)
+    return json.dumps(result)
 
 
 async def _search_memory(args: dict, user_id: str | None) -> str:

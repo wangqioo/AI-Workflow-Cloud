@@ -15,6 +15,7 @@ from .memory.router import router as memory_router
 from .openclaw.router import router as openclaw_router
 from .rag.router import router as rag_router
 from .doc_version.router import router as doc_version_router
+from .services.router import router as services_router
 from .task_system.router import router as task_router
 from .workflow.router import router as workflow_router
 
@@ -57,6 +58,7 @@ app.include_router(rag_router)
 app.include_router(workflow_router)
 app.include_router(doc_version_router)
 app.include_router(task_router)
+app.include_router(services_router)
 
 
 @app.get("/health")
