@@ -8,8 +8,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from .auth.router import router as auth_router
 from .config import settings
 from .database import engine, Base
+from .engines.router import router as engines_router
 from .llm.provider import get_llm_provider
 from .llm.router import router as llm_router
+from .openclaw.router import router as openclaw_router
 
 
 @asynccontextmanager
@@ -43,6 +45,8 @@ app.add_middleware(
 # Routers
 app.include_router(auth_router)
 app.include_router(llm_router)
+app.include_router(engines_router)
+app.include_router(openclaw_router)
 
 
 @app.get("/health")
