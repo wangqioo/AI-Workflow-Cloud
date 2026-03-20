@@ -504,15 +504,46 @@ async def _list_workflows(args: dict, user_id: str | None) -> str:
 
 
 async def _doc_list_projects(args: dict, user_id: str | None) -> str:
-    return json.dumps({"status": "not_implemented", "message": "Doc version pending migration"})
+    from ..database import async_session
+    from ..doc_version import service as doc_svc
+    import uuid as _uuid
+
+    if not user_id:
+        return json.dumps({"error": "User context required"})
+    async with async_session() as db:
+        projects = await doc_svc.list_projects(db, _uuid.UUID(user_id))
+        await db.commit()
+    return json.dumps({"projects": projects})
 
 
 async def _doc_search(args: dict, user_id: str | None) -> str:
-    return json.dumps({"status": "not_implemented", "message": "Doc version pending migration"})
+    from ..database import async_session
+    from ..doc_version import service as doc_svc
+    import uuid as _uuid
+
+    if not user_id:
+        return json.dumps({"error": "User context required"})
+    tag = args.get("tag")
+    doc_type = args.get("doc_type")
+    async with async_session() as db:
+        docs = await doc_svc.search_documents(db, _uuid.UUID(user_id), tag=tag, doc_type=doc_type)
+        await db.commit()
+    return json.dumps({"documents": docs, "count": len(docs)})
 
 
 async def _doc_get_history(args: dict, user_id: str | None) -> str:
-    return json.dumps({"status": "not_implemented", "message": "Doc version pending migration"})
+    from ..database import async_session
+    from ..doc_version import service as doc_svc
+    import uuid as _uuid
+
+    if not user_id:
+        return json.dumps({"error": "User context required"})
+    doc_id = args.get("doc_id", "")
+    limit = int(args.get("limit", 20))
+    async with async_session() as db:
+        history = await doc_svc.get_history(db, _uuid.UUID(user_id), doc_id, limit)
+        await db.commit()
+    return json.dumps({"history": history})
 
 
 async def _create_task(args: dict, user_id: str | None) -> str:

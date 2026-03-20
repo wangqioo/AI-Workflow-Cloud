@@ -1,3 +1,4 @@
+from .doc_version import DocProject, DocRelationship, DocumentVersion, VersionedDocument
 from .memory import ConversationTurn, CoreMemory, SemanticMemory, SessionSummary
 from .rag import Chunk, Document
 from .user import User
@@ -13,4 +14,8 @@ __all__ = [
     "Chunk",
     "Workflow",
     "WorkflowExecution",
+    "VersionedDocument",
+    "DocumentVersion",
+    "DocProject",
+    "DocRelationship",
 ]
