@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# Environment
+.env
+deploy/.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Docker volumes
+postgres_data/
+redis_data/
+qdrant_data/
+minio_data/
+
+# Node
+node_modules/
+web/dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# SSL certs
+deploy/nginx/ssl/
+
+# Logs
+*.log
+
+# Test
+.coverage
+htmlcov/
+.pytest_cache/
