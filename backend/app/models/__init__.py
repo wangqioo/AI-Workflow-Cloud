@@ -1,4 +1,5 @@
 from .memory import ConversationTurn, CoreMemory, SemanticMemory, SessionSummary
+from .rag import Chunk, Document
 from .user import User
 
 __all__ = [
@@ -7,4 +8,6 @@ __all__ = [
     "SessionSummary",
     "CoreMemory",
     "ConversationTurn",
+    "Document",
+    "Chunk",
 ]

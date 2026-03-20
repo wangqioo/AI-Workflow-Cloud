@@ -381,7 +381,18 @@ async def _text_to_speech(args: dict, user_id: str | None) -> str:
 
 
 async def _query_knowledge_base(args: dict, user_id: str | None) -> str:
-    return json.dumps({"status": "not_implemented", "message": "RAG service pending migration"})
+    from ..database import async_session
+    from ..rag import service as rag_svc
+    import uuid as _uuid
+
+    if not user_id:
+        return json.dumps({"error": "User context required"})
+    query_text = args.get("query", "")
+    top_k = int(args.get("top_k", 5))
+    async with async_session() as db:
+        results = await rag_svc.query(db, _uuid.UUID(user_id), query_text, top_k)
+        await db.commit()
+    return json.dumps({"results": results, "count": len(results)})
 
 
 async def _crawl_webpage(args: dict, user_id: str | None) -> str:
