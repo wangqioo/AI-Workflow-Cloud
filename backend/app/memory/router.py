@@ -43,9 +43,11 @@ async def save_memory(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    return await service.save_memory(
+    result = await service.save_memory(
         db, user.id, body.content, body.category, body.importance, body.source_session
     )
+    result["status"] = "saved"
+    return result
 
 
 @router.post("/search")

@@ -8,9 +8,8 @@ import uuid
 from datetime import datetime
 
 from sqlalchemy import (
-    Boolean, DateTime, Float, ForeignKey, Integer, String, Text, func,
+    Boolean, DateTime, Float, ForeignKey, Integer, JSON, String, Text, Uuid, func,
 )
-from sqlalchemy.dialects.postgresql import JSON, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from ..database import Base
@@ -21,8 +20,8 @@ class SemanticMemory(Base):
 
     __tablename__ = "semantic_memory"
 
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), index=True)
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey("users.id"), index=True)
     content: Mapped[str] = mapped_column(Text)
     category: Mapped[str] = mapped_column(String(50), index=True)  # fact/preference/skill/relationship
     importance: Mapped[float] = mapped_column(Float, default=0.5)
@@ -40,8 +39,8 @@ class SessionSummary(Base):
 
     __tablename__ = "session_summaries"
 
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), index=True)
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey("users.id"), index=True)
     session_id: Mapped[str] = mapped_column(String(100), unique=True)
     summary: Mapped[str] = mapped_column(Text)
     turn_count: Mapped[int] = mapped_column(Integer, default=0)
@@ -54,8 +53,8 @@ class CoreMemory(Base):
 
     __tablename__ = "core_memory"
 
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), index=True)
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey("users.id"), index=True)
     block_type: Mapped[str] = mapped_column(String(20))  # 'user' or 'agent'
     content: Mapped[dict] = mapped_column(JSON, default=dict)
     version: Mapped[int] = mapped_column(Integer, default=1)
@@ -67,8 +66,8 @@ class ConversationTurn(Base):
 
     __tablename__ = "conversation_turns"
 
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), index=True)
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey("users.id"), index=True)
     session_id: Mapped[str] = mapped_column(String(100), index=True)
     turn_index: Mapped[int] = mapped_column(Integer)
     role: Mapped[str] = mapped_column(String(20))  # user/assistant/system/tool

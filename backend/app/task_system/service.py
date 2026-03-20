@@ -235,7 +235,7 @@ async def update_progress(
         from_user="system",
         msg_type="progress_update",
         content=f"Progress: {percentage}% - {description}",
-        metadata={"percentage": percentage, "milestone": milestone},
+        extra_data={"percentage": percentage, "milestone": milestone},
     )
     db.add(msg)
     return _task_to_dict(task)

@@ -21,4 +21,5 @@ async def get_capabilities(user: User = Depends(get_current_user)):
 
 @router.get("/health")
 async def get_health(user: User = Depends(get_current_user)):
-    return {"services": get_registry().get_health()}
+    health = get_registry().get_health()
+    return {"status": "ok", "services": health}

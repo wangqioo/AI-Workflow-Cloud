@@ -112,6 +112,7 @@ async def ingest_text(
             pass  # Vector index failure is non-fatal
 
     return {
+        "doc_id": str(doc.id),
         "document_id": str(doc.id),
         "filename": filename,
         "num_chunks": len(chunks),
@@ -246,7 +247,9 @@ async def get_stats(db: AsyncSession, user_id: uuid.UUID) -> dict:
     )).scalar() or 0
 
     return {
+        "documents": doc_count,
         "num_documents": doc_count,
+        "chunks": chunk_count,
         "num_chunks": chunk_count,
         "total_size": total_size,
     }

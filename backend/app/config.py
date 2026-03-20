@@ -22,8 +22,12 @@ class Settings(BaseSettings):
     postgres_password: str = "changeme"
     postgres_db: str = "ai_workflow_terminal"
 
+    database_url_override: str = ""
+
     @property
     def database_url(self) -> str:
+        if self.database_url_override:
+            return self.database_url_override
         return (
             f"postgresql+asyncpg://{self.postgres_user}:{self.postgres_password}"
             f"@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"

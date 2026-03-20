@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime
 
 from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text, func
-from sqlalchemy.dialects.postgresql import ARRAY, JSONB
+from sqlalchemy import JSON as JSONB  # portable across PostgreSQL/SQLite
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..database import Base
@@ -33,8 +33,8 @@ class Workflow(Base):
     input_schema: Mapped[dict] = mapped_column(JSONB, default=dict)
     output_schema: Mapped[dict] = mapped_column(JSONB, default=dict)
 
-    tags: Mapped[list] = mapped_column(ARRAY(String), default=list)
-    engines_required: Mapped[list] = mapped_column(ARRAY(String), default=list)
+    tags: Mapped[list] = mapped_column(JSONB, default=list)
+    engines_required: Mapped[list] = mapped_column(JSONB, default=list)
 
     is_active: Mapped[bool] = mapped_column(default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

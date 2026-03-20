@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from sqlalchemy import (
     Boolean, DateTime, ForeignKey, Integer, String, Text, func,
 )
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import JSON as JSONB  # portable across PostgreSQL/SQLite
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..database import Base

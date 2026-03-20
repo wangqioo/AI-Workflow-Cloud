@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from sqlalchemy import (
     Boolean, DateTime, ForeignKey, Integer, String, Text, func,
 )
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import JSON as JSONB  # portable across PostgreSQL/SQLite
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..database import Base
@@ -89,7 +89,7 @@ class TaskMessage(Base):
     from_user: Mapped[str] = mapped_column(String(128))
     msg_type: Mapped[str] = mapped_column(String(32))  # task_created, progress_update, text_message, etc.
     content: Mapped[str] = mapped_column(Text)
-    metadata: Mapped[dict] = mapped_column(JSONB, default=dict)
+    extra_data: Mapped[dict] = mapped_column("metadata", JSONB, default=dict)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     task: Mapped["Task"] = relationship(back_populates="messages")

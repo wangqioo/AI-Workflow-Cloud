@@ -138,6 +138,50 @@ async def search_tasks(
     return {"tasks": tasks, "count": len(tasks)}
 
 
+# ---- Templates (must be before /{short_id} to avoid route conflict) ----
+
+@router.post("/templates")
+async def create_template(
+    body: TemplateCreateRequest,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    return await service.create_template(db, user.id, body.name, body.task_body, body.description)
+
+
+@router.get("/templates")
+async def list_templates(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    templates = await service.list_templates(db, user.id)
+    return {"templates": templates}
+
+
+@router.post("/templates/{template_id}/apply")
+async def apply_template(
+    template_id: uuid.UUID,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await service.apply_template(db, user.id, template_id)
+    if not result:
+        return {"error": "Template not found"}
+    return result
+
+
+@router.delete("/templates/{template_id}")
+async def delete_template(
+    template_id: uuid.UUID,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    ok = await service.delete_template(db, user.id, template_id)
+    if not ok:
+        return {"error": "Template not found"}
+    return {"status": "deleted"}
+
+
 @router.get("/{short_id}")
 async def get_task(
     short_id: str,
@@ -253,47 +297,3 @@ async def archive_task(
     if not ok:
         return {"error": "Task not found or not in closed/rejected status"}
     return {"status": "archived"}
-
-
-# ---- Templates ----
-
-@router.post("/templates")
-async def create_template(
-    body: TemplateCreateRequest,
-    user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
-):
-    return await service.create_template(db, user.id, body.name, body.task_body, body.description)
-
-
-@router.get("/templates")
-async def list_templates(
-    user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
-):
-    templates = await service.list_templates(db, user.id)
-    return {"templates": templates}
-
-
-@router.post("/templates/{template_id}/apply")
-async def apply_template(
-    template_id: uuid.UUID,
-    user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
-):
-    result = await service.apply_template(db, user.id, template_id)
-    if not result:
-        return {"error": "Template not found"}
-    return result
-
-
-@router.delete("/templates/{template_id}")
-async def delete_template(
-    template_id: uuid.UUID,
-    user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
-):
-    ok = await service.delete_template(db, user.id, template_id)
-    if not ok:
-        return {"error": "Template not found"}
-    return {"status": "deleted"}
