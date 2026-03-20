@@ -458,15 +458,49 @@ async def _smart_home_control(args: dict, user_id: str | None) -> str:
 
 
 async def _create_workflow(args: dict, user_id: str | None) -> str:
-    return json.dumps({"status": "not_implemented", "message": "Workflow engine pending migration"})
+    from ..database import async_session
+    from ..workflow import service as wf_svc
+    import uuid as _uuid
+
+    if not user_id:
+        return json.dumps({"error": "User context required"})
+    name = args.get("name", "Untitled")
+    description = args.get("description", "")
+    nodes = args.get("nodes", [])
+    connections = args.get("connections", {})
+    definition = {"workflow": {"nodes": nodes, "connections": connections}}
+    async with async_session() as db:
+        result = await wf_svc.create_workflow(db, _uuid.UUID(user_id), name, definition, description=description)
+        await db.commit()
+    return json.dumps(result)
 
 
 async def _execute_workflow(args: dict, user_id: str | None) -> str:
-    return json.dumps({"status": "not_implemented", "message": "Workflow engine pending migration"})
+    from ..database import async_session
+    from ..workflow import service as wf_svc
+    import uuid as _uuid
+
+    if not user_id:
+        return json.dumps({"error": "User context required"})
+    workflow_id = args.get("workflow_id", "")
+    input_data = args.get("input_data", {})
+    async with async_session() as db:
+        result = await wf_svc.execute(db, _uuid.UUID(user_id), _uuid.UUID(workflow_id), input_data=input_data)
+        await db.commit()
+    return json.dumps(result)
 
 
 async def _list_workflows(args: dict, user_id: str | None) -> str:
-    return json.dumps({"status": "not_implemented", "message": "Workflow engine pending migration"})
+    from ..database import async_session
+    from ..workflow import service as wf_svc
+    import uuid as _uuid
+
+    if not user_id:
+        return json.dumps({"error": "User context required"})
+    async with async_session() as db:
+        workflows = await wf_svc.list_workflows(db, _uuid.UUID(user_id))
+        await db.commit()
+    return json.dumps({"workflows": workflows, "count": len(workflows)})
 
 
 async def _doc_list_projects(args: dict, user_id: str | None) -> str:

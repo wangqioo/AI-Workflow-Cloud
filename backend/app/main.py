@@ -14,6 +14,7 @@ from .llm.router import router as llm_router
 from .memory.router import router as memory_router
 from .openclaw.router import router as openclaw_router
 from .rag.router import router as rag_router
+from .workflow.router import router as workflow_router
 
 
 @asynccontextmanager
@@ -51,6 +52,7 @@ app.include_router(engines_router)
 app.include_router(memory_router)
 app.include_router(openclaw_router)
 app.include_router(rag_router)
+app.include_router(workflow_router)
 
 
 @app.get("/health")
