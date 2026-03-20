@@ -547,11 +547,36 @@ async def _doc_get_history(args: dict, user_id: str | None) -> str:
 
 
 async def _create_task(args: dict, user_id: str | None) -> str:
-    return json.dumps({"status": "not_implemented", "message": "Task system pending migration"})
+    from ..database import async_session
+    from ..task_system import service as task_svc
+    import uuid as _uuid
+
+    if not user_id:
+        return json.dumps({"error": "User context required"})
+    title = args.get("title", "Untitled Task")
+    description = args.get("description", "")
+    priority = args.get("priority", "medium")
+    async with async_session() as db:
+        result = await task_svc.create_task(
+            db, _uuid.UUID(user_id), title,
+            description=description, priority=priority,
+        )
+        await db.commit()
+    return json.dumps(result)
 
 
 async def _list_tasks(args: dict, user_id: str | None) -> str:
-    return json.dumps({"status": "not_implemented", "message": "Task system pending migration"})
+    from ..database import async_session
+    from ..task_system import service as task_svc
+    import uuid as _uuid
+
+    if not user_id:
+        return json.dumps({"error": "User context required"})
+    status = args.get("status")
+    async with async_session() as db:
+        tasks = await task_svc.list_tasks(db, _uuid.UUID(user_id), status=status)
+        await db.commit()
+    return json.dumps({"tasks": tasks, "count": len(tasks)})
 
 
 async def _wake_device(args: dict, user_id: str | None) -> str:
