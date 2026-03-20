@@ -405,11 +405,37 @@ async def _send_email(args: dict, user_id: str | None) -> str:
 
 
 async def _search_memory(args: dict, user_id: str | None) -> str:
-    return json.dumps({"status": "not_implemented", "message": "Memory service pending migration"})
+    from ..database import async_session
+    from ..memory import service as mem_svc
+    import uuid as _uuid
+
+    if not user_id:
+        return json.dumps({"error": "User context required"})
+    query = args.get("query", "")
+    top_k = int(args.get("top_k", 10))
+    category = args.get("category")
+    async with async_session() as db:
+        results = await mem_svc.search_memory(db, _uuid.UUID(user_id), query, top_k, category)
+        await db.commit()
+    return json.dumps({"results": results})
 
 
 async def _save_memory(args: dict, user_id: str | None) -> str:
-    return json.dumps({"status": "not_implemented", "message": "Memory service pending migration"})
+    from ..database import async_session
+    from ..memory import service as mem_svc
+    import uuid as _uuid
+
+    if not user_id:
+        return json.dumps({"error": "User context required"})
+    content = args.get("content", "")
+    category = args.get("category", "fact")
+    tags = args.get("tags", [])
+    if tags and isinstance(tags, list):
+        content = f"{content} [tags: {', '.join(tags)}]"
+    async with async_session() as db:
+        result = await mem_svc.save_memory(db, _uuid.UUID(user_id), content, category)
+        await db.commit()
+    return json.dumps(result)
 
 
 async def _smart_home_devices(args: dict, user_id: str | None) -> str:
