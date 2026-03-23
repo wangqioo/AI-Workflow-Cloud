@@ -16,8 +16,10 @@ from .openclaw.router import router as openclaw_router
 from .rag.router import router as rag_router
 from .doc_version.router import router as doc_version_router
 from .services.router import router as services_router
+from .settings.router import router as settings_router
 from .task_system.router import router as task_router
 from .workflow.router import router as workflow_router
+from .settings.service import apply_saved_config_on_startup
 
 
 @asynccontextmanager
@@ -26,6 +28,8 @@ async def lifespan(app: FastAPI):
     if settings.app_debug:
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
+    # Apply saved LLM config (persisted across restarts)
+    apply_saved_config_on_startup()
     yield
     # Shutdown: close LLM HTTP client
     llm = get_llm_provider()
@@ -59,6 +63,7 @@ app.include_router(workflow_router)
 app.include_router(doc_version_router)
 app.include_router(task_router)
 app.include_router(services_router)
+app.include_router(settings_router)
 
 
 @app.get("/health")
